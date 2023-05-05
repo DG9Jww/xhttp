@@ -11,7 +11,8 @@ import (
 )
 
 func TestGetString(t *testing.T) {
-	s, err := GetString("http://www.baidu.com")
+	cli := NewClient()
+	s, err := cli.GetString("http://www.baidu.com")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -20,7 +21,16 @@ func TestGetString(t *testing.T) {
 }
 
 func TestPostString(t *testing.T) {
-	s, err := PostString("http://www.baidu.com", 50)
+	cli := NewClient()
+	cli.SetProxy("http://127.0.0.1:8080")
+	s, err := cli.PostString("http://www.baidu.com", "888")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(s)
+
+	cli.PostString("http://www.baidu.com", "666")
 	if err != nil {
 		fmt.Println(err)
 		return

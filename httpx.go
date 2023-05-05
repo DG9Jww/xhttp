@@ -48,9 +48,14 @@ func (c *Client) SkipVerify() {
 	c.cli = &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 }
 
-// 设置请求头
-func (c *Client) SetHeaders(header http.Header) {
-	c.req.Header = header
+// 设置请求头，会覆盖掉原来的值
+func (c *Client) SetHeader(k string, v string) {
+	c.req.Header.Set(k, v)
+}
+
+// 新添请求头部
+func (c *Client) AddHeader(k string, v string) {
+	c.req.Header.Add(k, v)
 }
 
 //-----------------------------------------------------------------------
@@ -168,15 +173,15 @@ var validMethod = map[string]bool{
 /*
 设置请求方法
 支持的请求方法如下
-  "OPTIONS"
-  "GET"
-  "HEAD"
-  "POST"
-  "PUT"
-  "DELETE"
-  "TRACE"
-  "CONNECT"
 
+	"OPTIONS"
+	"GET"
+	"HEAD"
+	"POST"
+	"PUT"
+	"DELETE"
+	"TRACE"
+	"CONNECT"
 */
 func setMethod(method string, req *http.Request) error {
 	//非法请求方法
