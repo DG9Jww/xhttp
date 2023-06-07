@@ -7,33 +7,51 @@ package xhttp
 
 import (
 	"fmt"
+	"log"
 	"testing"
 )
 
-func TestGetString(t *testing.T) {
+func TestDoA(t *testing.T) {
 	cli := NewClient()
-	s, err := cli.GetString("http://www.baidu.com")
+	cli.SetHeaders(map[string]string{
+		"aaa": "bbbb",
+		"bbb": "bbbb",
+		"ccc": "bbbb",
+	})
+	cli.SetProxy("http://127.0.0.1:8080")
+	resp, err := cli.DoA("GET", "http://www.baidu.com", nil)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
 	}
-	fmt.Println(s)
+	fmt.Println(resp)
 }
 
-func TestPostString(t *testing.T) {
+func TestDoB(t *testing.T) {
 	cli := NewClient()
+	cli.SetHeaders(map[string]string{
+		"aaa": "bbbb",
+		"bbb": "bbbb",
+		"ccc": "bbbb",
+	})
 	cli.SetProxy("http://127.0.0.1:8080")
-	s, err := cli.PostString("http://www.baidu.com", "888")
+	resp, err := cli.DoB("GET", "http://www.baidu.com", nil)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
 	}
-	fmt.Println(s)
+	fmt.Println(resp)
+}
 
-	cli.PostString("http://www.baidu.com", "666")
+func TestDoC(t *testing.T) {
+	cli := NewClient()
+	cli.SetHeaders(map[string]string{
+		"aaa": "bbbb",
+		"bbb": "bbbb",
+		"ccc": "bbbb",
+	})
+	cli.SetProxy("http://127.0.0.1:8080")
+	resp, err := cli.DoC("GET", "http://www.baidu.com", nil)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
 	}
-	fmt.Println(s)
+	fmt.Println(resp.Header)
 }
