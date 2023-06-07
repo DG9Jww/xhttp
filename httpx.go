@@ -6,6 +6,8 @@
 package xhttp
 
 import (
+	"compress/flate"
+	"compress/gzip"
 	"crypto/tls"
 	"io"
 	"net/http"
@@ -32,26 +34,49 @@ func NewClient() *Client {
 	}
 }
 
-/*******
-设置头部
-*******/
-
+// 设置头部
 func (c *Client) SetHeader(key, value string) {
 	c.headers.Set(key, value)
 }
 
+// 设置多个头部
 func (c *Client) SetHeaders(headers map[string]string) {
 	for key, value := range headers {
 		c.SetHeader(key, value)
 	}
 }
 
-/*******
-设置代理
-*******/
-
+// 设置代理
 func (c *Client) SetProxy(proxyURL string) {
 	c.proxy = proxyURL
+}
+
+/*******
+判断是否压缩
+*******/
+
+// 尝试解压缩并读取body
+func DecompressAndReadBody(resp *http.Response) ([]byte, error) {
+	var reader io.ReadCloser
+	var err error
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	case "deflate":
+		reader = flate.NewReader(resp.Body)
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	bodyBytes, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	return bodyBytes, nil
 }
 
 /*******
@@ -80,12 +105,12 @@ func (c *Client) DoA(method string, host string, body []byte) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
+	bodyBytes, err := DecompressAndReadBody(resp)
 	if err != nil {
 		return "", err
 	}
 
-	return string(respBody), nil
+	return string(bodyBytes), nil
 }
 
 // 返回请求体[]byte
@@ -110,12 +135,12 @@ func (c *Client) DoB(method string, host string, body []byte) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
+	bodyBytes, err := DecompressAndReadBody(resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return respBody, nil
+	return bodyBytes, nil
 }
 
 // 返回*http.Response
